@@ -8,6 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
+import Env from 'tinymce/core/api/Env';
 import Settings from '../api/Settings';
 import * as CaretContainer from '../caret/CaretContainer';
 import NodeType from '../dom/NodeType';
@@ -228,6 +229,9 @@ const insert = function (editor, evt) {
 
     caretNode = block;
 
+    //Необходимо чтобы новые абзацы были с правильными отступами
+    block.classList.remove('without-margin');
+
     if (Settings.shouldKeepStyles(editor) === false) {
       dom.setAttrib(block, 'style', null); // wipe out any styles that came over with the block
       dom.setAttrib(block, 'class', null);
@@ -260,7 +264,10 @@ const insert = function (editor, evt) {
 
   // Returns true/false if the caret is at the start/end of the parent block element
   const isCaretAtStartOrEndOfBlock = function (start?) {
-    let walker, node, name, normalizedOffset;
+    // Так как в MSIE симол FEFF иногда используется вместо <br data-mce-bogus="1">
+    // https://online.sbis.ru/opendoc.html?guid=f8c866cb-9582-4bc8-b516-cbb213bd050c
+    let whiteSpaceRegExp = Env.ie ? /^[ \t\r\n\uFEFF]*$/ : /^[ \t\r\n]*$/,
+      walker, node, name, normalizedOffset;
 
     normalizedOffset = normalizeZwspOffset(start, container, offset);
 
@@ -306,7 +313,7 @@ const insert = function (editor, evt) {
             return false;
           }
         }
-      } else if (NodeType.isText(node) && !/^[ \t\r\n]*$/.test(node.nodeValue)) {
+      } else if (NodeType.isText(node) && !whiteSpaceRegExp.test(node.nodeValue)) {
         return false;
       }
 

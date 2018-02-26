@@ -304,6 +304,15 @@ const initContentBody = function (editor, skipWrite?) {
   if (settings.content_style) {
     appendStyle(editor, settings.content_style);
   }
+
+  //Проблема:
+  //          Пользователи могут быть очень быстрыми (destroy может сработать сразу после init)
+  //          fire(init) происходит в середине метода initContentBody, после еще происходят обращения к редактору
+  //          Eсли destroy сработает сразу после fire('init') оставшиеся вызовы в функции initContentBody будут падать с ошибками
+  //Решение:
+  //          Стрелять событием initContentBody в конце метода initContentBody,
+  //          чтобы только после выполнения всего метода можно было позвать destroy
+  editor.fire('initContentBody');
 };
 
 export default {

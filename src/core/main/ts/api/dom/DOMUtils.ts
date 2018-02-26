@@ -37,7 +37,9 @@ import Tools from '../util/Tools';
 const each = Tools.each, is = Tools.is, grep = Tools.grep;
 const isIE = Env.ie;
 const simpleSelectorRe = /^([a-z0-9],?)+$/i;
-const whiteSpaceRegExp = /^[ \t\r\n]*$/;
+// https://online.sbis.ru/opendoc.html?guid=641817d3-c5c2-422e-a0ef-6b4ce24d6b0e
+// Так как в MSIE симол FEFF иногда используется вместо <br data-mce-bogus="1">
+const whiteSpaceRegExp = isIE ? /^[ \t\r\n\uFEFF]*$/ : /^[ \t\r\n]*$/;
 
 const setupAttrHooks = function (domUtils, settings) {
   let attrHooks: any = {};

@@ -23,6 +23,14 @@ const isEditorUIElement = function (elm) {
 };
 
 const isUIElement = function (editor, elm) {
+  // https://online.sbis.ru/opendoc.html?guid=67d146d9-3051-4c71-8f83-ffd6f0fb64c2&des=
+  //Проблема:
+  //          isUIElement может случиться после destroy редактора
+  //Решение:
+  //          Проверять редактор на destroyed
+  if (editor.destroyed) {
+    return;
+  }
   const customSelector = editor ? editor.settings.custom_ui_selector : '';
   const parent = DOM.getParent(elm, function (elm) {
     return (

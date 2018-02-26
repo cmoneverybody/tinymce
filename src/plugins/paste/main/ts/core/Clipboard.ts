@@ -47,10 +47,15 @@ const pasteHtml = (editor: Editor, html: string, internalFlag: boolean) => {
  * @param {String} text Text to paste as the current selection location.
  */
 const pasteText = (editor, text: string) => {
-  text = editor.dom.encode(text).replace(/\r\n/g, '\n');
-  text = Newlines.convert(text, editor.settings.forced_root_block, editor.settings.forced_root_block_attrs);
+  text = prepareTextBeforePaste(editor, text);
 
   pasteHtml(editor, text, false);
+};
+
+const prepareTextBeforePaste = (editor, text) => {
+  text = editor.dom.encode(text).replace(/\r\n/g, '\n');
+  text = Newlines.convert(text, editor.settings.forced_root_block, editor.settings.forced_root_block_attrs);
+  return text;
 };
 
 export interface ClipboardContents {
@@ -315,7 +320,9 @@ const registerEventHandlers = (editor: Editor, pasteBin: PasteBin, pasteFormat: 
         content = Utils.innerText(content);
       }
     }
-
+      if (editor.fire('onBeforePaste', {content: content}).isDefaultPrevented()) {
+        return;
+      }
     // If the content is the paste bin default HTML then it was
     // impossible to get the cliboard data out.
     if (pasteBin.isDefaultContent(content)) {

@@ -569,6 +569,15 @@ export const Selection = function (dom, win: Window, serializer, editor: Editor)
     let scrollContainer, node = dom.getRoot();
 
     while (node && node.nodeName !== 'BODY') {
+      //Проблема:
+      //          при вставке контента если смещение поля ввода меньше чем скролл родительского элемента происходит подскролл
+      //Решение:
+      //          если поле ввода находится в фиксированном элементе данный подскролл не нужен
+      const styles = getComputedStyle(node);
+      if (styles && styles.position == 'fixed') {
+        return;
+      }
+
       if (node.scrollHeight > node.clientHeight) {
         scrollContainer = node;
         break;

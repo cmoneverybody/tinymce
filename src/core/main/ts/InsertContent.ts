@@ -116,9 +116,29 @@ const insertHtmlAtCaret = function (editor, value, details) {
       const root = editor.getBody(), elementUtils = new ElementUtils(dom);
 
       Tools.each(dom.select('*[data-mce-fragment]'), function (node) {
-        for (let testNode = node.parentNode; testNode && testNode !== root; testNode = testNode.parentNode) {
-          if (textInlineElements[node.nodeName.toLowerCase()] && elementUtils.compare(testNode, node)) {
-            dom.remove(node, true);
+        if (textInlineElements[node.nodeName.toLowerCase()]) {
+          for (let ansector = node.parentNode; ansector && ansector != root; ansector = ansector.parentNode) {
+            if (elementUtils.compare(ansector, node)) {
+              // Найден выщестоящий элемент, имеющий такой же тип, атрибуты и инлайн-стили, что и проверяемый node. Значит, можно
+              // удалить node, пересадив его содержимое на его место. Но ТОЛЬКО ЕСЛИ между ansector и node нет элементов,
+              // переопределяющих их общий стиль иначе
+              // 1174471769 https://online.sbis.ru/opendoc.html?guid=8baf7b51-a733-4b3a-accf-74c75c182e8c
+              let hasMiddle;
+              let style = dom.parseStyle(dom.getAttrib(node, 'style'));
+              for (let n = node.parentNode; n && n != ansector; n = n.parentNode) {
+                let s = dom.parseStyle(dom.getAttrib(n, 'style'));
+                for (let p in style) {
+                  if (p in s && s[p] !== style[p]) {
+                    hasMiddle = true;
+                      break;
+                    }
+                  }
+                }
+              if (!hasMiddle) {
+                dom.remove(node, true);
+                  break;
+                }
+            }
           }
         }
       });

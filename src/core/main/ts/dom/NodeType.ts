@@ -7,6 +7,7 @@
  * License: http://www.tinymce.com/license
  * Contributing: http://www.tinymce.com/contributing
  */
+import Env from 'tinymce/core/api/Env';
 
 const isNodeType = function (type) {
   return function (node: Node) {
@@ -80,7 +81,10 @@ const isTable = (node: Node): node is Element => isElement(node) && node.tagName
 const hasContentEditableState = function (value: string) {
   return function (node: Node) {
     if (isElement(node)) {
-      if (node.contentEditable === value) {
+      // В MSIE элементы как правило имеют contentEditable === 'inherit' и сравнивать с 'true' или 'false' бессмысленно,
+      // поэтому определим нужным элементам значения по умолчанию
+      // 1174460187 https://online.sbis.ru/opendoc.html?guid=4363b1d3-4bf7-4ef1-b743-4959f5550a84
+      if (node.contentEditable === value|| (Env.ie && node.contentEditable === 'inherit' && {'IMG':'false'}[node.nodeName] === value)) {
         return true;
       }
 

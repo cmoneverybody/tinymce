@@ -71,6 +71,14 @@ const render = function (editor, theme, args) {
   };
 
   const render = function () {
+    //Проблема:
+    //          render может случиться после destroy редактора
+    //Решение:
+    //          Проверять редактор на destroyed
+    if (editor.destroyed) {
+       return;
+    }
+
     if (panel) {
       if (!panel.visible()) {
         show();

@@ -521,7 +521,12 @@ const ControlSelection = (selection: Selection, editor): ControlSelection => {
     }
 
     const throttledUpdateResizeRect = Delay.throttle(function (e) {
-      if (!editor.composing) {
+      //Проблема:
+      //       Если экземпляру редактора позвать destroy() сразу после инициализации
+      //       будет ошибка тк updateResizeRect происходит отложенно
+      //Решение:
+      //       Перед вызовом updateResizeRect проверять редактор на destroyed
+      if (!editor.composing && !editor.destroyed) {
         updateResizeRect(e);
       }
     });

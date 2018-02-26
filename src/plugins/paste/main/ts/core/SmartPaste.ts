@@ -29,9 +29,10 @@ const pasteHtml = function (editor: Editor, html: string) {
  * @class tinymce.pasteplugin.SmartPaste
  * @private
  */
-
+// TODO Добавили символ ; сами, в соответствии со стандартом https://tools.ietf.org/html/rfc3986, он входит в список разрешенных
+// https://online.sbis.ru/opendoc.html?guid=bc3cde8f-909b-4cef-834a-9d63ded2499d
 const isAbsoluteUrl = function (url: string) {
-  return /^https?:\/\/[\w\?\-\/+=.&%@~#]+$/i.test(url);
+  return /^https?:\/\/[\w\?\-\/+=.;&%@~#]+$/i.test(url);
 };
 
 const isImageUrl = function (url: string) {
@@ -52,7 +53,15 @@ const createLink = function (editor: Editor, url: string, pasteHtmlFn: typeof pa
   editor.undoManager.extra(function () {
     pasteHtmlFn(editor, url);
   }, function () {
-    editor.execCommand('mceInsertLink', false, url);
+    let
+      linkAttr = {
+        target: '_blank',
+        rel: null,
+        'class': null,
+        title: null,
+        href: url
+      };
+    editor.execCommand('mceInsertLink', false, linkAttr);
   });
 
   return true;
@@ -63,7 +72,9 @@ const linkSelection = function (editor: Editor, html: string, pasteHtmlFn: typeo
 };
 
 const insertImage = function (editor: Editor, html: string, pasteHtmlFn: typeof pasteHtml) {
-  return isImageUrl(html) ? createImage(editor, html, pasteHtmlFn) : false;
+  //Чтобы по ctrl+v не вставлялась картинка
+  return false;
+  // return isImageUrl(html) ? createImage(editor, html, pasteHtmlFn) : false;
 };
 
 const smartInsertContent = function (editor: Editor, html: string) {

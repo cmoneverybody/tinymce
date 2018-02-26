@@ -7,11 +7,14 @@
  * License: http://www.tinymce.com/license
  * Contributing: http://www.tinymce.com/contributing
  */
+import Env from 'tinymce/core/api/Env';
 
 export type ElementMap = Array<{ [name: string]: boolean; }>;
 export type Attributes = Array<{ [name: string]: string; }>;
 
-const whiteSpaceRegExp = /^[ \t\r\n]*$/;
+// Так как в MSIE симол FEFF иногда используется вместо <br data-mce-bogus="1">
+// https://online.sbis.ru/opendoc.html?guid=f8c866cb-9582-4bc8-b516-cbb213bd050c
+const whiteSpaceRegExp = Env.ie ? /^[ \t\r\n\uFEFF]*$/ : /^[ \t\r\n]*$/;
 const typeLookup = {
   '#text': 3,
   '#comment': 8,

@@ -193,5 +193,8 @@ const promise = function () {
   return Promise;
 };
 
-const promiseObj = window.Promise ? window.Promise : promise();
+// Только если это стандартное обещание его можно использовать (для IE)
+//TODO: По мере исправления этого недочёта в оригинальном TinyMCE - обновить
+// Задача https://online.sbis.ru/opendoc.html?guid=827218ed-d90d-46e5-af76-814bb7bf715b
+const promiseObj = window.Promise && window.Promise.all ? window.Promise : promise();
 export default promiseObj;
