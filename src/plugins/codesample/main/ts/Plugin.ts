@@ -16,6 +16,7 @@ import LoadCss from './core/LoadCss';
 import Buttons from './ui/Buttons';
 import Dialog from './ui/Dialog';
 import Utils from './util/Utils';
+import CodeSample from './core/CodeSample'
 
 const addedInlineCss = Cell(false);
 
@@ -35,6 +36,8 @@ PluginManager.add('codesample', function (editor, pluginUrl) {
       Dialog.open(editor);
     }
   });
+  // Старая версия экспортировала часть функционала наружу, возвращаем это поведение
+  return CodeSample
 });
 
 export default function () { }

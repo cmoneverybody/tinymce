@@ -474,7 +474,9 @@ export {
   pasteImageData,
   getDataTransferItems,
   hasHtmlOrText,
-  hasContentType
+  hasContentType,
+  // Используем в RichTextEditor
+  prepareTextBeforePaste
 };
 
 // export interface Clipboard {

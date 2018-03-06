@@ -1,4 +1,4 @@
-import { ClipboardContents, registerEventsAndFilters, pasteHtml, pasteText, pasteImageData, getDataTransferItems, hasContentType, hasHtmlOrText } from '../core/Clipboard';
+import { ClipboardContents, registerEventsAndFilters, pasteHtml, pasteText, pasteImageData, getDataTransferItems, hasContentType, hasHtmlOrText, prepareTextBeforePaste } from '../core/Clipboard';
 import { PasteBin } from '../core/PasteBin';
 import Settings from './Settings';
 
@@ -26,6 +26,8 @@ export const Clipboard = (editor): Clipboard => {
     pasteImageData: (e: ClipboardEvent | DragEvent, rng: Range) => pasteImageData(editor, e, rng),
     getDataTransferItems,
     hasHtmlOrText,
-    hasContentType
+    hasContentType,
+    // Наша функция, используется в логике вставки в html или текстовом формате в оригинальнов tinymce она не экспортируется наружу
+    prepareTextBeforePaste
   };
 };

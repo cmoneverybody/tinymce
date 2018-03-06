@@ -293,10 +293,16 @@ const initContentBody = function (editor, skipWrite?) {
   getStyleSheetLoader(editor).loadAll(
     editor.contentCSS,
     function (_) {
-      initEditor(editor);
+      // асинхронная операция инициализации, контрол могли уничтожить до ее завершения
+      if (!editor.destroyed) {
+        initEditor(editor);
+      }
     },
     function (urls) {
-      initEditor(editor);
+      // асинхронная операция инициализации, контрол могли уничтожить до ее завершения
+      if (!editor.destroyed) {
+        initEditor(editor);
+      }
     }
   );
 
