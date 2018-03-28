@@ -14,6 +14,8 @@ import Tools from 'tinymce/core/api/util/Tools';
 import TrimHtml from 'tinymce/core/dom/TrimHtml';
 import Serializer from 'tinymce/core/api/html/Serializer';
 import * as FilterNode from './html/FilterNode';
+import { Option, Fun } from '@ephox/katamari';
+import Zwsp from 'tinymce/core/text/Zwsp';
 
 const defaultFormat = 'html';
 
@@ -36,8 +38,7 @@ export interface GetContentArgs {
 
 const isTreeNode = (content: any): content is Node => content instanceof Node;
 
-const setContentString = (editor, content: string, args: SetContentArgs): string => {
-  const body = editor.getBody();
+const setContentString = (editor: Editor, body: HTMLElement, content: string, args: SetContentArgs): string => {
   let forcedRootBlockName, padd;
 
   // Padd empty content in Gecko and Safari. Commands will otherwise fail on the content
@@ -87,13 +88,13 @@ const setContentString = (editor, content: string, args: SetContentArgs): string
   return args.content as string;
 };
 
-const setContentTree = (editor: Editor, content: Node, args: SetContentArgs): Node => {
+const setContentTree = (editor: Editor, body: HTMLElement, content: Node, args: SetContentArgs): Node => {
   FilterNode.filter(editor.parser.getNodeFilters(), editor.parser.getAttributeFilters(), content);
 
   const html = Serializer({ validate: editor.validate }, editor.schema).serialize(content);
 
   args.content = Tools.trim(html);
-  editor.dom.setHTML(editor.getBody(), args.content);
+  editor.dom.setHTML(body, args.content);
 
   if (!args.no_events) {
     editor.fire('SetContent', args);
@@ -102,26 +103,8 @@ const setContentTree = (editor: Editor, content: Node, args: SetContentArgs): No
   return content;
 };
 
-const setContent = (editor: Editor, content: Content, args: SetContentArgs = {}): Content => {
-  args.format = args.format ? args.format : defaultFormat;
-  args.set = true;
-  args.content = isTreeNode(content) ? '' : content;
-
-  if (!isTreeNode(content) && !args.no_events) {
-    editor.fire('BeforeSetContent', args);
-    content = args.content;
-  }
-
-  return isTreeNode(content) ? setContentTree(editor, content, args) : setContentString(editor, content, args);
-};
-
-const getContent = (editor: Editor, args: GetContentArgs = {}): Content => {
+const getContentFromBody = (editor, args, body) => {
   let content;
-  const body = editor.getBody();
-
-  if (editor.removed) {
-    return '';
-  }
 
   args.format = args.format ? args.format : defaultFormat;
   args.get = true;
@@ -134,7 +117,7 @@ const getContent = (editor: Editor, args: GetContentArgs = {}): Content => {
   if (args.format === 'raw') {
     content = Tools.trim(TrimHtml.trimExternal(editor.serializer, body.innerHTML));
   } else if (args.format === 'text') {
-    content = body.innerText || body.textContent;
+    content = Zwsp.trim(body.innerText || body.textContent);
   } else if (args.format === 'tree') {
     return editor.serializer.serialize(body, args);
   } else {
@@ -152,6 +135,32 @@ const getContent = (editor: Editor, args: GetContentArgs = {}): Content => {
   }
 
   return args.content;
+};
+
+const setContent = (editor: Editor, content: Content, args: SetContentArgs = {}): Content => {
+  args.format = args.format ? args.format : defaultFormat;
+  args.set = true;
+  args.content = isTreeNode(content) ? '' : content;
+
+  if (!isTreeNode(content) && !args.no_events) {
+    editor.fire('BeforeSetContent', args);
+    content = args.content;
+  }
+
+  return Option.from(editor.getBody())
+    .fold(
+      Fun.constant(content),
+      (body) => isTreeNode(content) ? setContentTree(editor, body, content, args) : setContentString(editor, body, content, args)
+    );
+
+};
+
+const getContent = (editor: Editor, args: GetContentArgs = {}): Content => {
+  return Option.from(editor.getBody())
+    .fold(
+      Fun.constant(args.format === 'tree' ? new Node('body', 11) : ''),
+      (body) => getContentFromBody(editor, args, body)
+    );
 };
 
 export {

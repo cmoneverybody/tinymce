@@ -55,7 +55,7 @@ const SelectionOverrides = function (editor: Editor): SelectionOverrides {
 
   const getRealSelectionElement = function () {
     const container = editor.dom.get(realSelectionId);
-    return container ? container.getElementsByTagName('*')[0] : container;
+    return container ? container.getElementsByTagName('*')[0] as HTMLElement : container;
   };
 
   const setRange = function (range: Range) {
@@ -155,6 +155,8 @@ const SelectionOverrides = function (editor: Editor): SelectionOverrides {
     editor.on('blur NewBlock', function () {
       removeContentEditableSelection();
     });
+
+    editor.on('ResizeWindow FullscreenStateChanged', () => fakeCaret.reposition());
 
     const handleTouchSelect = function (editor) {
       let moved = false;

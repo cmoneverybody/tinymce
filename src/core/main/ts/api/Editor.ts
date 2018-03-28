@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-import AddOnManager from './AddOnManager';
+import { AddOnManager } from './AddOnManager';
 import EditorCommands from './EditorCommands';
 import EditorObservable from './EditorObservable';
 import * as EditorSettings from '../EditorSettings';
@@ -27,8 +27,6 @@ import { Selection } from 'tinymce/core/api/dom/Selection';
 import * as EditorContent from 'tinymce/core/EditorContent';
 import * as EditorRemove from '../EditorRemove';
 import SelectionOverrides from 'tinymce/core/SelectionOverrides';
-
-/*jshint scripturl:true */
 
 /**
  * Include the base event class documentation.
@@ -57,6 +55,7 @@ import SelectionOverrides from 'tinymce/core/SelectionOverrides';
  */
 
 export interface Editor {
+  dom: DOMUtils;
   selection: Selection;
   _selectionOverrides: SelectionOverrides;
   [key: string]: any;
@@ -237,6 +236,16 @@ Editor.prototype = {
    */
   focus (skipFocus) {
     EditorFocus.focus(this, skipFocus);
+  },
+
+  /**
+   * Returns true/false if the editor has real keyboard focus.
+   *
+   * @method hasFocus
+   * @return {Boolean} Current focus state of the editor.
+   */
+  hasFocus () {
+    return EditorFocus.hasFocus(this);
   },
 
   /**
@@ -1046,7 +1055,7 @@ Editor.prototype = {
   addVisual (elm) {
     const self = this;
     const settings = self.settings;
-    const dom = self.dom;
+    const dom: DOMUtils = self.dom;
     let cls;
 
     elm = elm || self.getBody();
@@ -1072,7 +1081,7 @@ Editor.prototype = {
           return;
 
         case 'A':
-          if (!dom.getAttrib(elm, 'href', false)) {
+          if (!dom.getAttrib(elm, 'href')) {
             value = dom.getAttrib(elm, 'name') || elm.id;
             cls = settings.visual_anchor_class || 'mce-item-anchor';
 
